@@ -35,6 +35,10 @@ def test_complete_poll_flow(tmp_path: Path):
         assert response.status_code == 200
         assert response.json()["ok"] is True
 
+        asset = client.get("/static/styles.css")
+        assert asset.status_code == 200
+        assert "--uab: #009639" in asset.text
+
         response = client.get("/admin/setup")
         token = csrf(response.text)
         response = client.post(

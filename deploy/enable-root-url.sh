@@ -10,7 +10,7 @@ if [[ ! -f "$NGINX_SITE" ]]; then
   exit 1
 fi
 
-sudo cp -n "$NGINX_SITE" "$BACKUP"
+sudo cp --update=none "$NGINX_SITE" "$BACKUP"
 sudo python3 - "$NGINX_SITE" <<'PY'
 from pathlib import Path
 import sys
@@ -42,10 +42,15 @@ PY
 
 sudo nginx -t
 sudo systemctl reload nginx
-sed -i 's#UAB_POLLS_ROOT_PATH=/horario/enquestes#UAB_POLLS_ROOT_PATH=/enquestes#' "$APP_SERVICE"
-systemctl --user daemon-reload
-systemctl --user restart uab-polls.service
+if [[ "${EUID}" -eq 0 ]]; then
+  runuser -u gian -- sed -i 's#UAB_POLLS_ROOT_PATH=/horario/enquestes#UAB_POLLS_ROOT_PATH=/enquestes#' "$APP_SERVICE"
+  runuser -u gian -- env XDG_RUNTIME_DIR=/run/user/1000 systemctl --user daemon-reload
+  runuser -u gian -- env XDG_RUNTIME_DIR=/run/user/1000 systemctl --user restart uab-polls.service
+else
+  sed -i 's#UAB_POLLS_ROOT_PATH=/horario/enquestes#UAB_POLLS_ROOT_PATH=/enquestes#' "$APP_SERVICE"
+  systemctl --user daemon-reload
+  systemctl --user restart uab-polls.service
+fi
 curl -fsS http://127.0.0.1/enquestes/health -H 'Host: pomodoro.uab.cat'
 echo
 echo "Ruta activa: http://pomodoro.uab.cat/enquestes/"
-

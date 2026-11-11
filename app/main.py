@@ -9,8 +9,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -53,7 +52,6 @@ app.add_middleware(
     same_site="lax",
     https_only=settings.secure_cookies,
 )
-app.mount("/static", StaticFiles(directory=APP_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=APP_DIR / "templates")
 
 
@@ -121,6 +119,15 @@ def fmt_dt(value: str | None) -> str:
 
 
 templates.env.filters["datetime_ca"] = fmt_dt
+
+
+@app.get("/static/{path:path}", name="static", include_in_schema=False)
+def static_asset(path: str) -> FileResponse:
+    static_dir = (APP_DIR / "static").resolve()
+    asset = (static_dir / path).resolve()
+    if static_dir not in asset.parents or not asset.is_file():
+        raise HTTPException(status_code=404, detail="Fitxer no trobat")
+    return FileResponse(asset)
 
 
 def load_poll(connection, slug: str):
