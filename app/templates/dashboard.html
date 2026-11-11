@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Enquestes · Medicina UAB{% endblock %}
+{% block content %}
+<div class="page-heading split">
+  <div><span class="eyebrow">Administració</span><h1>Les teves enquestes</h1></div>
+  <a class="button button-primary" href="{{ url_for('poll_new_form') }}">+ Nova enquesta</a>
+</div>
+{% if polls %}
+<div class="poll-list">
+  {% for poll in polls %}
+  <a class="poll-row card" href="{{ url_for('admin_poll', poll_id=poll.id) }}">
+    <div><span class="status status-{{ poll.status }}">{{ 'Oberta' if poll.status == 'open' else 'Tancada' }}</span><h2>{{ poll.title }}</h2><p>{{ poll.created_at|datetime_ca }}</p></div>
+    <div class="poll-stats"><span><strong>{{ poll.slot_count }}</strong> opcions</span><span><strong>{{ poll.participant_count }}</strong> respostes</span><b>→</b></div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty card"><div class="empty-icon">⌁</div><h2>Encara no hi ha cap enquesta</h2><p>Crea la primera i comparteix-ne l'enllaç.</p><a class="button button-primary" href="{{ url_for('poll_new_form') }}">Crea una enquesta</a></div>
+{% endif %}
+{% endblock %}
+

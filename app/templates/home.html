@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Disponibilitat · Medicina UAB{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <span class="eyebrow">Planificació senzilla i compartida</span>
+    <h1>Troba el millor moment per reunir-vos.</h1>
+    <p class="lead">Crea opcions horàries, comparteix l'enllaç i consulta totes les disponibilitats en un sol lloc.</p>
+    {% if admin_count == 0 %}
+      <a class="button button-primary" href="{{ url_for('setup_form') }}">Configura el compte administrador</a>
+    {% else %}
+      <a class="button button-primary" href="{{ url_for('login_form') }}">Accés d'administració</a>
+    {% endif %}
+  </div>
+  <div class="hero-card" aria-hidden="true">
+    <div class="mini-date"><strong>Dl. 16</strong><span>10:00</span><i class="dot yes"></i><i class="dot yes"></i><i class="dot maybe"></i></div>
+    <div class="mini-date active"><strong>Dt. 17</strong><span>12:30</span><i class="dot yes"></i><i class="dot yes"></i><i class="dot yes"></i></div>
+    <div class="mini-date"><strong>Dj. 19</strong><span>09:30</span><i class="dot yes"></i><i class="dot no"></i><i class="dot maybe"></i></div>
+  </div>
+</section>
+{% endblock %}
+

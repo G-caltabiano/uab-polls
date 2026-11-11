@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Nova enquesta · Medicina UAB{% endblock %}
+{% block content %}
+<div class="page-heading"><a class="back-link" href="{{ url_for('admin_dashboard') }}">← Enquestes</a><span class="eyebrow">Nova enquesta</span><h1>Quin dia us va millor?</h1><p>Defineix la reunió i selecciona les opcions directament al calendari.</p></div>
+<form method="post" id="poll-form" class="creator-layout">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <input type="hidden" name="slots_json" id="slots-json">
+  <section class="card form-card">
+    <h2>1. Detalls</h2>
+    <div class="stack-form">
+      <label>Títol de la reunió<input name="title" required maxlength="180" placeholder="Ex. Reunió de coordinació"></label>
+      <label>Descripció <span class="optional">Opcional</span><textarea name="description" rows="3" maxlength="3000" placeholder="Afegeix context per als participants"></textarea></label>
+      <label>Lloc o videotrucada <span class="optional">Opcional</span><input name="location" maxlength="200" placeholder="Ex. Sala M5/012 o Teams"></label>
+      <fieldset><legend>Durada</legend><div class="segmented">
+        <label><input type="radio" name="duration" value="30"><span>30 min</span></label>
+        <label><input type="radio" name="duration" value="60" checked><span>60 min</span></label>
+        <label><input type="radio" name="duration" value="90"><span>90 min</span></label>
+      </div></fieldset>
+      <label>Data límit per respondre <span class="optional">Opcional</span><input name="deadline" type="datetime-local"></label>
+    </div>
+  </section>
+  <section class="card calendar-card">
+    <div class="calendar-heading"><div><h2>2. Opcions horàries</h2><p>Fes clic a una hora per afegir o retirar una opció.</p></div><div class="calendar-nav"><button type="button" id="prev-week" aria-label="Setmana anterior">←</button><button type="button" id="today">Avui</button><button type="button" id="next-week" aria-label="Setmana següent">→</button></div></div>
+    <div id="week-label" class="week-label"></div>
+    <div id="calendar-grid" class="calendar-grid" aria-label="Calendari setmanal"></div>
+    <div class="selection-footer"><span><strong id="selection-count">0</strong> opcions seleccionades</span><button class="link-button danger" id="clear-slots" type="button">Esborra-les</button></div>
+  </section>
+  <div class="form-actions"><a class="button button-secondary" href="{{ url_for('admin_dashboard') }}">Cancel·la</a><button class="button button-primary" type="submit">Crea i comparteix</button></div>
+</form>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='creator.js') }}"></script>{% endblock %}
+

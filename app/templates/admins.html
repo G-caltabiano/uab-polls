@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Administradors · Medicina UAB{% endblock %}
+{% block content %}
+<div class="page-heading"><span class="eyebrow">Configuració</span><h1>Administradors</h1><p>Convida altres persones perquè puguin crear i gestionar enquestes.</p></div>
+{% if generated_invite_url %}<section class="share-box card success-box"><div><strong>Invitació creada</strong><p>L'enllaç caduca al cap de 7 dies i només es pot utilitzar una vegada.</p></div><div class="copy-row"><input id="invite-url" value="{{ generated_invite_url }}" readonly><button class="button button-primary" id="copy-invite" type="button">Copia</button></div></section>{% endif %}
+<div class="admin-grid">
+  <section class="card"><h2>Comptes actius</h2><ul class="people-list">{% for item in admins %}<li><div class="avatar">{{ item.display_name[:1]|upper }}</div><div><strong>{{ item.display_name }}</strong><small>{{ item.email }}</small></div><span class="status status-open">Actiu</span></li>{% endfor %}</ul></section>
+  <section class="card"><h2>Convida un administrador</h2><form method="post" action="{{ url_for('create_invite') }}" class="stack-form"><input type="hidden" name="csrf" value="{{ csrf }}"><label>Correu electrònic<input name="email" type="email" required placeholder="nom@uab.cat"></label><p class="muted">Es generarà un enllaç d'un sol ús. Comparteix-lo només amb la persona indicada.</p><button class="button button-primary" type="submit">Genera la invitació</button></form></section>
+</div>
+{% if invites %}<section class="card"><h2>Invitacions recents</h2><div class="table-scroll"><table class="simple-table"><thead><tr><th>Correu</th><th>Creada</th><th>Caducitat</th><th>Estat</th></tr></thead><tbody>{% for item in invites %}<tr><td>{{ item.email }}</td><td>{{ item.created_at|datetime_ca }}</td><td>{{ item.expires_at|datetime_ca }}</td><td>{{ 'Utilitzada' if item.used_at else 'Pendent' }}</td></tr>{% endfor %}</tbody></table></div></section>{% endif %}
+{% endblock %}
+{% block scripts %}<script>
+document.getElementById('copy-invite')?.addEventListener('click', async event => {
+  const input = document.getElementById('invite-url'); let copied = false;
+  if (navigator.clipboard && window.isSecureContext) { try { await navigator.clipboard.writeText(input.value); copied = true; } catch (_) {} }
+  if (!copied) { input.focus(); input.select(); input.setSelectionRange(0, input.value.length); copied = document.execCommand('copy'); }
+  event.currentTarget.textContent = copied ? 'Copiat!' : 'Seleccionat';
+});
+</script>{% endblock %}

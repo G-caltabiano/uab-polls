@@ -1,0 +1,2 @@
+"""UAB Polls application package."""
+

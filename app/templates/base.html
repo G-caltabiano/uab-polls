@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#009639">
+  <title>{% block title %}Disponibilitat · Medicina UAB{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="{{ url_for('home') }}" aria-label="Inici">
+        <img src="{{ url_for('static', path='uab-medicina.svg') }}" alt="Facultat de Medicina · UAB">
+        <span class="brand-divider"></span>
+        <span class="brand-product">Disponibilitat</span>
+      </a>
+      {% if admin %}
+      <nav class="admin-nav" aria-label="Administració">
+        <a href="{{ url_for('admin_dashboard') }}">Enquestes</a>
+        <a href="{{ url_for('admins_page') }}">Administradors</a>
+        <span class="nav-user">{{ admin.display_name }}</span>
+        <form method="post" action="{{ url_for('logout') }}">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="link-button" type="submit">Surt</button>
+        </form>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+
+  {% if flash %}
+  <div class="shell flash flash-{{ flash.kind }}" role="status">{{ flash.message }}</div>
+  {% endif %}
+
+  <main class="shell page">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell">Facultat de Medicina · Universitat Autònoma de Barcelona</div>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
+

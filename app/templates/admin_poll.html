@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ poll.title }} · Administració{% endblock %}
+{% block content %}
+<div class="page-heading split align-start">
+  <div><a class="back-link" href="{{ url_for('admin_dashboard') }}">← Enquestes</a><span class="status status-{{ poll.status }}">{{ 'Oberta' if poll.status == 'open' else 'Tancada' }}</span><h1>{{ poll.title }}</h1>{% if poll.description %}<p>{{ poll.description }}</p>{% endif %}</div>
+  <div class="action-cluster"><a class="button button-secondary" href="{{ url_for('export_poll', poll_id=poll.id) }}">Descarrega Excel</a><form method="post" action="{{ url_for('admin_poll_toggle', poll_id=poll.id) }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="button {{ 'button-danger' if poll.status == 'open' else 'button-primary' }}" type="submit">{{ 'Tanca l’enquesta' if poll.status == 'open' else 'Torna a obrir' }}</button></form></div>
+</div>
+
+<section class="share-box card">
+  <div><span class="eyebrow">Enllaç per compartir</span><p>Qualsevol persona amb aquest enllaç pot respondre.</p></div>
+  <div class="copy-row"><input id="public-url" value="{{ public_url }}" readonly><button class="button button-primary" id="copy-link" type="button">Copia</button><a class="button button-secondary" href="{{ public_url }}" target="_blank">Obre</a></div>
+</section>
+
+<div class="stats-strip">
+  <div class="metric card"><span>Respostes</span><strong>{{ participants|length }}</strong></div>
+  <div class="metric card"><span>Opcions</span><strong>{{ slots|length }}</strong></div>
+  <div class="metric card"><span>Durada</span><strong>{{ poll.duration_minutes }} min</strong></div>
+</div>
+
+{% if summary %}
+<section class="card best-options">
+  <div class="section-heading"><div><span class="eyebrow">Resultat</span><h2>Opcions més votades</h2></div><span class="legend"><i class="choice-dot yes"></i>Sí · <i class="choice-dot maybe"></i>Potser</span></div>
+  <div class="ranking">
+    {% for item in summary[:3] %}
+      {% set slot = slots|selectattr('id', 'equalto', item.slot_id)|first %}
+      <div class="rank-item {{ 'winner' if loop.first else '' }}"><span class="rank-number">{{ loop.index }}</span><div><strong>{{ slot.start_at|datetime_ca }}</strong><small>{{ item.yes_count }} sí · {{ item.maybe_count }} potser</small></div><div class="score">{{ item.yes_count * 2 + item.maybe_count }}<small>punts</small></div></div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="card matrix-card">
+  <div class="section-heading"><div><span class="eyebrow">Detall</span><h2>Qui ha triat què</h2></div></div>
+  {% if participants %}
+  <div class="table-scroll"><table class="matrix"><thead><tr><th class="sticky-col">Participant</th>{% for slot in slots %}<th>{{ slot.start_at|datetime_ca }}</th>{% endfor %}</tr></thead><tbody>
+    {% for participant in participants %}<tr><th class="sticky-col"><strong>{{ participant.name }}</strong><small>{{ participant.email }}</small></th>{% for slot in slots %}{% set value = responses.get((participant.id, slot.id), 'no') %}<td><span class="choice choice-{{ value }}" title="{{ value }}">{{ '✓' if value == 'yes' else ('?' if value == 'maybe' else '×') }}</span></td>{% endfor %}</tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty compact"><p>Encara no hi ha respostes.</p></div>{% endif %}
+</section>
+
+<section class="card notification-card"><div class="section-heading"><div><span class="eyebrow">Notificacions</span><h2>Estat del correu</h2></div><span class="status status-open">Gmail · Friday</span></div>
+  {% if notifications %}<ul class="notification-list">{% for item in notifications %}<li><span class="notification-status {{ item.status }}">{{ item.status }}</span><span>{{ item.recipient }}</span><small>{{ item.created_at|datetime_ca }}{% if item.detail %} · {{ item.detail }}{% endif %}</small></li>{% endfor %}</ul>{% else %}<p class="muted">No hi ha notificacions registrades.</p>{% endif %}
+</section>
+{% endblock %}
+{% block scripts %}<script>
+async function copyInput(input, button) {
+  let copied = false;
+  if (navigator.clipboard && window.isSecureContext) {
+    try { await navigator.clipboard.writeText(input.value); copied = true; } catch (_) {}
+  }
+  if (!copied) {
+    input.focus(); input.select(); input.setSelectionRange(0, input.value.length);
+    copied = document.execCommand('copy');
+    window.getSelection()?.removeAllRanges();
+  }
+  button.textContent = copied ? 'Copiat!' : 'Seleccionat';
+  if (!copied) input.select();
+  setTimeout(() => button.textContent = 'Copia', 1500);
+}
+document.getElementById('copy-link')?.addEventListener('click', event => copyInput(document.getElementById('public-url'), event.currentTarget));
+</script>{% endblock %}

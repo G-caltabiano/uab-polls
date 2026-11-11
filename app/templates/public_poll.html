@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ poll.title }} · Disponibilitat{% endblock %}
+{% block content %}
+<div class="public-heading"><span class="status status-{{ poll.status }}">{{ 'Oberta' if accepting else 'Tancada' }}</span><h1>{{ poll.title }}</h1>{% if poll.description %}<p>{{ poll.description }}</p>{% endif %}<div class="poll-meta"><span>◷ {{ poll.duration_minutes }} min</span>{% if poll.location %}<span>⌖ {{ poll.location }}</span>{% endif %}{% if poll.deadline_at %}<span>Data límit: {{ poll.deadline_at|datetime_ca }}</span>{% endif %}</div></div>
+
+{% if accepting %}
+<form method="post" class="public-form card">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <div class="honeypot" aria-hidden="true"><label>Web<input name="website" tabindex="-1" autocomplete="off"></label></div>
+  <div class="respondent-grid"><label>Nom i cognoms<input name="name" required maxlength="120" autocomplete="name" placeholder="El teu nom"></label><label>Correu electrònic<input name="email" type="email" required maxlength="254" autocomplete="email" placeholder="nom@uab.cat"></label></div>
+  <div class="availability-heading"><div><h2>Marca la teva disponibilitat</h2><p>Pots triar sí, potser o no per a cada opció.</p></div><div class="choice-legend"><span><i class="choice choice-yes">✓</i>Sí</span><span><i class="choice choice-maybe">?</i>Potser</span><span><i class="choice choice-no">×</i>No</span></div></div>
+  <div class="option-list">
+    {% for slot in slots %}
+    <fieldset class="option-row"><legend><strong>{{ slot.start_at|datetime_ca }}</strong><small>fins a {{ slot.end_at|datetime_ca }}</small></legend><div class="availability-options">
+      <label class="availability yes"><input type="radio" name="choice_{{ slot.id }}" value="yes" checked><span>✓ <b>Sí</b></span></label>
+      <label class="availability maybe"><input type="radio" name="choice_{{ slot.id }}" value="maybe"><span>? <b>Potser</b></span></label>
+      <label class="availability no"><input type="radio" name="choice_{{ slot.id }}" value="no"><span>× <b>No</b></span></label>
+    </div></fieldset>
+    {% endfor %}
+  </div>
+  <label class="privacy-check"><input type="checkbox" name="privacy" value="accepted" required><span>Accepto que el meu nom i les meves disponibilitats siguin visibles per a la resta de participants. El correu només serà visible per als administradors.</span></label>
+  <button class="button button-primary submit-response" type="submit">Envia la disponibilitat</button>
+</form>
+{% else %}<div class="closed-message card"><h2>L'enquesta està tancada</h2><p>Ja no accepta noves respostes, però pots consultar els resultats.</p></div>{% endif %}
+
+<section class="card public-results"><div class="section-heading"><div><span class="eyebrow">Resultats en directe</span><h2>Disponibilitat del grup</h2></div><span>{{ participants|length }} participants</span></div>
+{% if participants %}<div class="table-scroll"><table class="matrix public-matrix"><thead><tr><th class="sticky-col">Participant</th>{% for slot in slots %}<th>{{ slot.start_at|datetime_ca }}</th>{% endfor %}</tr></thead><tbody>{% for participant in participants %}<tr><th class="sticky-col">{{ participant.name }}</th>{% for slot in slots %}{% set value = responses.get((participant.id, slot.id), 'no') %}<td><span class="choice choice-{{ value }}">{{ '✓' if value == 'yes' else ('?' if value == 'maybe' else '×') }}</span></td>{% endfor %}</tr>{% endfor %}<tr class="totals"><th class="sticky-col">Total de «sí»</th>{% for slot in slots %}{% set item = summary|selectattr('slot_id', 'equalto', slot.id)|first %}<td><strong>{{ item.yes_count }}</strong></td>{% endfor %}</tr></tbody></table></div>{% else %}<div class="empty compact"><p>Sigues la primera persona a respondre.</p></div>{% endif %}
+</section>
+{% endblock %}
+

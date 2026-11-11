@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Accés administrador · Medicina UAB{% endblock %}
+{% block content %}
+<section class="auth-card card narrow">
+  <span class="eyebrow">Àrea privada</span>
+  <h1>Accés d'administració</h1>
+  <form method="post" class="stack-form">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Correu electrònic<input name="email" type="email" autocomplete="username" required></label>
+    <label>Contrasenya<input name="password" type="password" autocomplete="current-password" required></label>
+    <button class="button button-primary" type="submit">Entra</button>
+  </form>
+</section>
+{% endblock %}
+

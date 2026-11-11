@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Configuració inicial · Medicina UAB{% endblock %}
+{% block content %}
+<section class="auth-card card narrow">
+  <span class="eyebrow">Configuració inicial</span>
+  <h1>Crea el compte administrador</h1>
+  <p>Aquest primer compte queda reservat al correu UAB autoritzat.</p>
+  <form method="post" class="stack-form">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Nom complet<input name="name" autocomplete="name" required maxlength="100"></label>
+    <label>Correu UAB<input name="email" type="email" value="{{ settings.initial_admin_email }}" readonly></label>
+    <label>Contrasenya<input name="password" type="password" autocomplete="new-password" minlength="12" required><small>Mínim 12 caràcters.</small></label>
+    <button class="button button-primary" type="submit">Crea el compte</button>
+  </form>
+</section>
+{% endblock %}
+
