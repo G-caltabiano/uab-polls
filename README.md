@@ -26,6 +26,15 @@ En el servidor Pomodoro, l'app usa per defecte l'OAuth Gmail ja configurat amb
 `gog`: il mittente è `fridaygc.bot@gmail.com` e ogni amministratore attivo
 riceve una mail con le disponibilità inviate e il link ai risultati.
 
+Quan `gog` utilitza el keyring xifrat de fitxer, el gestor de serveis de l'usuari
+ha de rebre la variable protegida abans d'iniciar l'app (mai no s'ha d'escriure
+el valor a la unitat):
+
+```bash
+systemctl --user import-environment GOG_KEYRING_PASSWORD
+systemctl --user restart uab-polls.service
+```
+
 Per un altro server è disponibile anche SMTP tramite queste variabili:
 
 Les notificacions s'envien quan es configuren aquestes variables d'entorn:
