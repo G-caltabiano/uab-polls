@@ -40,6 +40,10 @@ def test_complete_poll_flow(tmp_path: Path):
         assert "--uab: #009639" in asset.text
 
         response = client.get("/admin/setup")
+        assert "Created by G.C. using dev@Friday" in response.text
+        logo = client.get("/static/dev-logo.jpg")
+        assert logo.status_code == 200
+        assert logo.headers["content-type"] == "image/jpeg"
         token = csrf(response.text)
         response = client.post(
             "/admin/setup",
