@@ -372,6 +372,27 @@ async def admin_poll_toggle(request: Request, poll_id: int):
     return go(request, "admin_poll", poll_id=str(poll_id))
 
 
+@app.post("/admin/polls/{poll_id}/delete")
+async def admin_poll_delete(request: Request, poll_id: int):
+    require_admin(request)
+    form = await request.form()
+    check_csrf(request, form)
+    if form.get("confirmation") != "delete":
+        raise HTTPException(status_code=400, detail="Confirmació no vàlida")
+    with db() as connection:
+        poll = connection.execute(
+            "SELECT title,status FROM polls WHERE id=?", (poll_id,)
+        ).fetchone()
+        if not poll:
+            raise HTTPException(status_code=404, detail="Enquesta no trobada")
+        if poll["status"] != "closed":
+            flash(request, "Només es poden eliminar les enquestes tancades.", "error")
+            return go(request, "admin_poll", poll_id=str(poll_id))
+        connection.execute("DELETE FROM polls WHERE id=?", (poll_id,))
+    flash(request, f"S'ha eliminat definitivament l'enquesta «{poll['title']}».", "success")
+    return go(request, "admin_dashboard")
+
+
 @app.get("/admin/polls/{poll_id}/export.xlsx")
 def export_poll(request: Request, poll_id: int):
     require_admin(request)

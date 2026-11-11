@@ -111,3 +111,32 @@ def test_complete_poll_flow(tmp_path: Path):
         workbook = load_workbook(export_path)
         assert workbook.sheetnames == ["Disponibilitats", "Resum"]
         assert workbook["Disponibilitats"]["A2"].value == "Participant Prova"
+
+        # An open poll cannot be deleted, even with a valid admin session and CSRF token.
+        token = csrf(admin.text)
+        response = client.post(
+            "/admin/polls/1/delete",
+            data={"csrf": token, "confirmation": "delete"},
+            follow_redirects=True,
+        )
+        assert "Només es poden eliminar les enquestes tancades" in response.text
+        assert "Reunió de prova" in response.text
+
+        # Once closed, deletion removes the poll and all dependent data through cascades.
+        response = client.post(
+            "/admin/polls/1/toggle",
+            data={"csrf": token},
+            follow_redirects=True,
+        )
+        assert "Elimina definitivament" in response.text
+        response = client.post(
+            "/admin/polls/1/delete",
+            data={"csrf": token, "confirmation": "delete"},
+            follow_redirects=True,
+        )
+        assert "S&#39;ha eliminat definitivament" in response.text
+        assert "Encara no hi ha cap enquesta" in response.text
+        with app.db.db() as connection:
+            assert connection.execute("SELECT COUNT(*) FROM polls").fetchone()[0] == 0
+            assert connection.execute("SELECT COUNT(*) FROM participants").fetchone()[0] == 0
+            assert connection.execute("SELECT COUNT(*) FROM responses").fetchone()[0] == 0

@@ -8,7 +8,8 @@ Aplicació web en català per crear enquestes de disponibilitat tipus Doodle.
 - Enllaç públic per enquesta.
 - Respostes `sí`, `potser` o `no` amb nom i correu.
 - Resultats visibles per nom; el correu només és visible per als administradors.
-- Tauler d'administració, tancament/reobertura i classificació de les millors opcions.
+- Tauler d'administració, tancament/reobertura, eliminació segura de les enquestes
+  tancades i classificació de les millors opcions.
 - Exportació Excel amb matriu i resum.
 - Comptes administradors addicionals mitjançant invitacions d'un sol ús.
 - Registre de notificacions per correu.
